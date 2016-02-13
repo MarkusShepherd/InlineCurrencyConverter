@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>InlineCurrency</title>
+</head>
+<body>
+    <p>Prices: 
+        <span class="currency">USD100</span>, 
+        <span class="currency">USD500</span>, 
+        <span class="currency">USD123.45</span>, 
+        <span class="currency">EUR100</span>, 
+        <span class="currency">PHP100</span>, 
+        <span class="currency">PHP20</span>, 
+        <span class="currency">PHP30000</span>
+    </p>
+
+    <script src="jquery-2.2.0.js"></script>
+    <script src="inlinecurrency.js"></script>
+    <script>
+        $(function(){
+            rates = {
+                "USD": {
+                    "EUR": .888376
+                },
+                "EUR": {
+                    "USD": 1.12565,
+                    "PHP": 53.5134
+                },
+                "PHP": {
+                    "EUR": .0186869
+                }
+            };
+            var targetCurr = "EUR";
+            $( ".currency" ).each(convertElement(targetCurr));
+        });
+    </script>
+
+</body>
+</html>
