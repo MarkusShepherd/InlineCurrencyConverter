@@ -7,13 +7,14 @@ var currencies = [
   "NZD", "PHP", "PLN", "RON", "RUB", 
   "SEK", "SGD", "THB", "TRY", "USD", "ZAR"
 ];
-var valueRegex = /(^|\W)([A-Za-z]{3})(\d+(\.\d{2})?)($|\W)/im;
-var classRegex = /([A-Za-z]{3}\d+(\.\d{2})?)/igm;
+var valueRegex = /(^|\W)([A-Za-z]{3})(\d+(\.\d{2})?)(-(\d+(\.\d{2})?))?($|\W)/im;
+var classRegex = /([A-Za-z]{3}\d+(\.\d{2})?(-\d+(\.\d{2})?)?)/igm;
 var currencyClass = "currency";
 var elementQuery = "." + currencyClass;
 var targetCurr = "EUR";
 var ddmIdStr = "currencyDDM";
 var ddmClassStr = "currencyDDM";
+var apiURL = "http://api.fixer.io/latest?base=" // "api/";
 
 var markTextWithClass = function(regex, classStr) {
   var textNodes = getTextNodesIn(jQuery("body"));
@@ -25,7 +26,7 @@ var markTextWithClass = function(regex, classStr) {
 
 var getRates = function(targetCurrency, updateElements) {
   targetCurrency = targetCurrency.toUpperCase();
-  jQuery.getJSON( "http://api.fixer.io/latest?base=" + targetCurrency, function(data) {
+  jQuery.getJSON( apiURL + targetCurrency, function(data) {
     var r;
     if (targetCurrency in rates)
       r = rates[targetCurrency];
@@ -53,6 +54,8 @@ var convertElement = function(targetCurrency) {
     var matches = valueRegex.exec(text);
     var baseCurrency = matches[2].toUpperCase();
     var value = parseFloat(matches[3]);
+    var isRange = matches[6] ? true : false;
+    var valueTo = isRange ? parseFloat(matches[6]) : undefined;
 
     var rate = 0;
 
@@ -60,9 +63,16 @@ var convertElement = function(targetCurrency) {
       rate = rates[baseCurrency][targetCurrency];
 
     text = baseCurrency + matches[3];
+    if (isRange)
+      text += '-' + matches[6];
     if (rate) {
       var valueConverted = value * rate;
-      text += ' (' + targetCurrency + valueConverted.toFixed(2) + ')';
+      text += ' (' + targetCurrency + valueConverted.toFixed(2);
+      if (isRange) {
+        var valueToConverted = valueTo * rate;
+        text += '-' + valueToConverted.toFixed(2);
+      }
+      text += ')';
     }
     jQuery(this).html(text);
   };
