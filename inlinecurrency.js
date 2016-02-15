@@ -16,16 +16,16 @@ var ddmIdStr = "currencyDDM";
 var ddmClassStr = "currencyDDM";
 
 var markTextWithClass = function(regex, classStr) {
-  var textNodes = getTextNodesIn($("body"));
+  var textNodes = getTextNodesIn(jQuery("body"));
   textNodes.replaceWith(function() {
-    var text = $(this)[0].textContent;
+    var text = jQuery(this)[0].textContent;
     return text.replace(regex, '<span class="' + classStr + '">$1</span>');
   });
 };
 
 var getRates = function(targetCurrency, updateElements) {
   targetCurrency = targetCurrency.toUpperCase();
-  $.getJSON( "http://api.fixer.io/latest?base=" + targetCurrency, function(data) {
+  jQuery.getJSON( "http://api.fixer.io/latest?base=" + targetCurrency, function(data) {
     var r;
     if (targetCurrency in rates)
       r = rates[targetCurrency];
@@ -34,22 +34,22 @@ var getRates = function(targetCurrency, updateElements) {
       rates[targetCurrency] = r;
     }
 
-    $.extend(r, data.rates);
-    $.each(data.rates, function(curr, val ) {
+    jQuery.extend(r, data.rates);
+    jQuery.each(data.rates, function(curr, val ) {
       if (!(curr in rates))
         rates[curr] = {};
       rates[curr][targetCurrency] = 1/val;
     });
 
     if (updateElements)
-      $(elementQuery).each(convertElement(targetCurrency));
+      jQuery(elementQuery).each(convertElement(targetCurrency));
   });
 };
 
 var convertElement = function(targetCurrency) {
   targetCurrency = targetCurrency.toUpperCase();
   return function(index) {
-    var text = $(this).text();
+    var text = jQuery(this).text();
     var matches = valueRegex.exec(text);
     var baseCurrency = matches[2].toUpperCase();
     var value = parseFloat(matches[3]);
@@ -59,17 +59,17 @@ var convertElement = function(targetCurrency) {
     if (baseCurrency !== targetCurrency && baseCurrency in rates && targetCurrency in rates[baseCurrency]) 
       rate = rates[baseCurrency][targetCurrency];
 
-    text = baseCurrency + value.toFixed(2)
+    text = baseCurrency + matches[3];
     if (rate) {
       var valueConverted = value * rate;
       text += ' (' + targetCurrency + valueConverted.toFixed(2) + ')';
     }
-    $(this).html(text);
+    jQuery(this).html(text);
   };
 };
 
 var getTextNodesIn = function(el) {
-  return $(el).find(":not(iframe)").addBack().contents().filter(function() {
+  return jQuery(el).find(":not(iframe)").addBack().contents().filter(function() {
     return this.nodeType === 3;
   });
 };
@@ -87,14 +87,14 @@ var initDropDownMenu = function(parent, idStr, classStr, defaultCurr, currs) {
               currs[i] + '</option>';
   html += '</select>';
 
-  $(html).on('change', function() {
-    targetCurr = $(this).val();
+  jQuery(html).on('change', function() {
+    targetCurr = jQuery(this).val();
     getRates(targetCurr, true);
   }).appendTo(parent);
 };
 
-$(function(){
+jQuery(function(){
   markTextWithClass(classRegex, currencyClass);
   getRates(targetCurr, true);
-  initDropDownMenu($("#ddmContainer"), ddmIdStr, ddmClassStr);
+  initDropDownMenu(jQuery("#ddmContainer"), ddmIdStr, ddmClassStr);
 });
