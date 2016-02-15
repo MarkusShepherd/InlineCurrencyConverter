@@ -7,7 +7,7 @@ var currencies = [
   "NZD", "PHP", "PLN", "RON", "RUB", 
   "SEK", "SGD", "THB", "TRY", "USD", "ZAR"
 ];
-var valueRegex = /(^|\W)([A-Za-z]{3})(\d+(\.\d{2})?)(-(\d+(\.\d{2})?))?($|\W)/im;
+var valueRegex = /(^|\W)([A-Za-z]{3})\s?(\d+(\.\d{2})?)(-(\d+(\.\d{2})?))?($|\W)/im;
 var classRegex = /([A-Za-z]{3}\d+(\.\d{2})?(-\d+(\.\d{2})?)?)/igm;
 var currencyClass = "currency";
 var elementQuery = "." + currencyClass;
@@ -62,12 +62,12 @@ var convertElement = function(targetCurrency) {
     if (baseCurrency !== targetCurrency && baseCurrency in rates && targetCurrency in rates[baseCurrency]) 
       rate = rates[baseCurrency][targetCurrency];
 
-    text = baseCurrency + matches[3];
+    text = baseCurrency + ' ' + matches[3];
     if (isRange)
       text += '-' + matches[6];
     if (rate) {
       var valueConverted = value * rate;
-      text += ' (' + targetCurrency + valueConverted.toFixed(2);
+      text += ' (' + targetCurrency + ' ' + valueConverted.toFixed(2);
       if (isRange) {
         var valueToConverted = valueTo * rate;
         text += '-' + valueToConverted.toFixed(2);
