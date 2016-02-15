@@ -1,15 +1,24 @@
 var rates = {};
+var currencies = [
+  "AUD", "BGN", "BRL", "CAD", "CHF", 
+  "CNY", "CZK", "DKK", "EUR", "GBP", "HKD", 
+  "HRK", "HUF", "IDR", "ILS", "INR", 
+  "JPY", "KRW", "MXN", "MYR", "NOK", 
+  "NZD", "PHP", "PLN", "RON", "RUB", 
+  "SEK", "SGD", "THB", "TRY", "USD", "ZAR"
+];
 var valueRegex = /(^|\W)([A-Za-z]{3})(\d+(\.\d{2})?)($|\W)/im;
 var classRegex = /([A-Za-z]{3}\d+(\.\d{2})?)/igm;
 var currencyClass = "currency";
 var elementQuery = "." + currencyClass;
 var targetCurr = "EUR";
+var ddmIdStr = "currencyDDM";
+var ddmClassStr = "currencyDDM";
 
 var markTextWithClass = function(regex, classStr) {
   var textNodes = getTextNodesIn($("body"));
   textNodes.replaceWith(function() {
     var text = $(this)[0].textContent;
-    console.log(text);
     return text.replace(regex, '<span class="' + classStr + '">$1</span>');
   });
 };
@@ -45,19 +54,16 @@ var convertElement = function(targetCurrency) {
     var baseCurrency = matches[2].toUpperCase();
     var value = parseFloat(matches[3]);
 
-    if (baseCurrency === targetCurrency)
-      return;
+    var rate = 0;
 
-    var rate;
-
-    if (baseCurrency in rates && targetCurrency in rates[baseCurrency]) 
+    if (baseCurrency !== targetCurrency && baseCurrency in rates && targetCurrency in rates[baseCurrency]) 
       rate = rates[baseCurrency][targetCurrency];
-    else
-      return;
 
-    var valueConverted = value * rate;
-
-    text = baseCurrency + value.toFixed(2) + ' (' + targetCurrency + valueConverted.toFixed(2) + ')';
+    text = baseCurrency + value.toFixed(2)
+    if (rate) {
+      var valueConverted = value * rate;
+      text += ' (' + targetCurrency + valueConverted.toFixed(2) + ')';
+    }
     $(this).html(text);
   };
 };
@@ -68,7 +74,27 @@ var getTextNodesIn = function(el) {
   });
 };
 
+var initDropDownMenu = function(parent, idStr, classStr, defaultCurr, currs) {
+  if (!defaultCurr)
+    defaultCurr = targetCurr;
+  if (!currs)
+    currs = currencies;
+
+  html = '<select id="' + idStr + '" class="' + classStr + '">';
+  for (var i = 0; i < currs.length; i++)
+    html += '<option value="' + currs[i] + '"' + 
+              (defaultCurr === currs[i] ? ' selected="selected"' : '') + '>' + 
+              currs[i] + '</option>';
+  html += '</select>';
+
+  $(html).on('change', function() {
+    targetCurr = $(this).val();
+    getRates(targetCurr, true);
+  }).appendTo(parent);
+};
+
 $(function(){
   markTextWithClass(classRegex, currencyClass);
   getRates(targetCurr, true);
+  initDropDownMenu($("#ddmContainer"), ddmIdStr, ddmClassStr);
 });
