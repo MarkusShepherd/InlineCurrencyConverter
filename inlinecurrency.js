@@ -112,7 +112,7 @@ var getTargetCcy = function(doGetRates) {
   if (!targetCcy && "localStorage" in window && window.localStorage.getItem('targetCcy'))
     setTargetCcy(window.localStorage.getItem('targetCcy'), true);
   else if (!targetCcy) {
-    $.getJSON('http://ipinfo.io', function(data) {
+    jQuery.getJSON('http://ipinfo.io', function(data) {
       console.log(data);
       var country = data.country;
       var ccy = countryCcy[country];
@@ -136,7 +136,7 @@ var setTargetCcy = function(ccy, updateDDM) {
   if ("localStorage" in window)
     window.localStorage.setItem('targetCcy', targetCcy);
   if (updateDDM)
-    $('#' + ddmIdStr).val(targetCcy);
+    jQuery('#' + ddmIdStr).val(targetCcy);
   return targetCcy;
 }
 
